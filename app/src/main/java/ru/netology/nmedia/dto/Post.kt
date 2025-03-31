@@ -20,9 +20,8 @@ object PostService{
             val truncated = number.toInt() / 10.0
             numberString = truncated.toString() + "К"
         } else if (num > 9_999 && num < 1_000_000){
-            number /= 100
-            val truncated = number.toInt() / 10.0
-            numberString = truncated.toString() + "К"
+            number /= 1000
+            numberString = ((number).toInt()).toString() + "К"
         } else if (num > 999_999){
             number /= 100_000
             val truncated = number.toInt() / 10.0
