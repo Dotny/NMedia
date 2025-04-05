@@ -5,10 +5,10 @@ data class Post(
     val author: String,
     val published: String,
     val content: String,
-    var likes: Long,
-    var share: Long,
-    var views: Long,
-    var likedByMe: Boolean
+    val likes: Long,
+    val share: Long,
+    val views: Long,
+    val likedByMe: Boolean
 )
 
 object PostService{
