@@ -1,7 +1,9 @@
 package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -10,14 +12,19 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.PostService
 
-typealias onLikeListener = (Post) -> Unit
-typealias onShareListener = (Post) -> Unit
+interface onIteractionListener {
+    fun onLike(post: Post)
+    fun onShare(post: Post)
+    fun onRemove(post: Post)
+    fun onEdit(post: Post)
+}
 
-class PostsAdapter(private val onLikeListener: onLikeListener, private val onShareListener: onShareListener): ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
+class PostsAdapter(private val onIteractionListener: onIteractionListener) :
+    ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(view, onLikeListener, onShareListener)
+        return PostViewHolder(view, onIteractionListener)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -25,9 +32,12 @@ class PostsAdapter(private val onLikeListener: onLikeListener, private val onSha
     }
 }
 
-class PostViewHolder(private val binding: CardPostBinding, private val onLikeListener: onLikeListener, private val onShareListener: onShareListener): RecyclerView.ViewHolder(binding.root){
+class PostViewHolder(
+    private val binding: CardPostBinding,
+    private val onIteractionListener: onIteractionListener
+) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(post: Post) = with(binding){
+    fun bind(post: Post) = with(binding) {
         author.text = post.author
         content.text = post.content
         published.text = post.published
@@ -43,16 +53,39 @@ class PostViewHolder(private val binding: CardPostBinding, private val onLikeLis
                 R.drawable.ic_like_24
             }
         )
+
         like.setOnClickListener {
-            onLikeListener(post)
+            onIteractionListener.onLike(post)
         }
+
         share.setOnClickListener {
-            onShareListener(post)
+            onIteractionListener.onShare(post)
+        }
+
+        menu.setOnClickListener {
+            PopupMenu(it.context, it).apply {
+                inflate(R.menu.post_actions)
+                setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.remove -> {
+                            onIteractionListener.onRemove(post)
+                            true
+                        }
+
+                        R.id.edit -> {
+                            onIteractionListener.onEdit(post)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            }.show()
         }
     }
 }
 
-object PostDiffCallback: DiffUtil.ItemCallback<Post>(){
+object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
     override fun areItemsTheSame(oldItem: Post, newItem: Post) = oldItem.id == newItem.id
 
     override fun areContentsTheSame(oldItem: Post, newItem: Post) = oldItem == newItem
