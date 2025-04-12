@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
                 binding.group.visibility = View.VISIBLE
+                binding.editText.text = post.content
             }
         })
 
